@@ -56,59 +56,61 @@ EventHandlerResult RolloverLogger::onKeyswitchEvent(Key& key,
     byte event_addr = addr::addr(row, col);
 
     for (KeyPress& key_press : key_presses_) {
-      if (key_press.addr == event_addr) {
-        if ((key.flags & (SYNTHETIC | RESERVED)) == 0) {
-          // This key is a keyboard key
-          if (key.keyCode >= HID_KEYBOARD_FIRST_MODIFIER &&
-              key.keyCode <= HID_KEYBOARD_LAST_MODIFIER) {
-            Serial.print(F("M"));  // "modifier"
-          } else {
-            Serial.print(F("S"));  // "standard"
-          }
-        } else if (key.flags == (SYNTHETIC | SWITCH_TO_KEYMAP) &&
-                   key.keyCode >= LAYER_SHIFT_OFFSET) {
-          Serial.print(F("M"));  // layer shift => "modifier"
-        } else {
-          Serial.print(F("S"));  // "other"
-        }
-
-        if (detail_level_ > 1) {
-          Serial.print(F(","));
-          if (col == 7 || col == 8) {
-            Serial.print(F("t"));  // "thumb"
-          } else if (event_addr == 54 || event_addr == 57) {
-            Serial.print(F("p"));  // "palm"
-          } else {
-            Serial.print(F("f"));  // "finger"
-          }
-        }
-
-        if (detail_level_ > 2) {
-          Serial.print(F(","));
-          Serial.print(event_addr, HEX);
-          Serial.print(F(","));
-          Serial.print(row, DEC);
-          Serial.print(F(","));
-          Serial.print(col, DEC);
-        }
-
-        if (detail_level_ > 3) {
-          Serial.print(F(","));
-          Serial.print(key.raw, HEX);
-        }
-
-        Serial.print(F("\t"));
-        Serial.print(key_press.time, DEC);
-        Serial.print(F("\t"));
-        uint16_t current_time = Kaleidoscope.millisAtCycleStart();
-        Serial.print(current_time, DEC);
-        Serial.print(F("\t"));
-        uint16_t elapsed_time = current_time - key_press.time;
-        Serial.println(elapsed_time, DEC);
-
-        // Make this key press entry available.
-        key_press.addr = invalid_addr;
+      if (key_press.addr != event_addr) {
+        continue;
       }
+
+      if ((key.flags & (SYNTHETIC | RESERVED)) == 0) {
+        // This key is a keyboard key
+        if (key.keyCode >= HID_KEYBOARD_FIRST_MODIFIER &&
+            key.keyCode <= HID_KEYBOARD_LAST_MODIFIER) {
+          Serial.print(F("M"));  // "modifier"
+        } else {
+          Serial.print(F("S"));  // "standard"
+        }
+      } else if (key.flags == (SYNTHETIC | SWITCH_TO_KEYMAP) &&
+                 key.keyCode >= LAYER_SHIFT_OFFSET) {
+        Serial.print(F("M"));  // layer shift => "modifier"
+      } else {
+        Serial.print(F("S"));  // "other"
+      }
+
+      if (detail_level_ > 1) {
+        Serial.print(F(","));
+        if (col == 7 || col == 8) {
+          Serial.print(F("t"));  // "thumb"
+        } else if (event_addr == 54 || event_addr == 57) {
+          Serial.print(F("p"));  // "palm"
+        } else {
+          Serial.print(F("f"));  // "finger"
+        }
+      }
+
+      if (detail_level_ > 2) {
+        Serial.print(F(","));
+        Serial.print(event_addr, HEX);
+        Serial.print(F(","));
+        Serial.print(row, DEC);
+        Serial.print(F(","));
+        Serial.print(col, DEC);
+      }
+
+      if (detail_level_ > 3) {
+        Serial.print(F(","));
+        Serial.print(key.raw, HEX);
+      }
+
+      Serial.print(F("\t"));
+      Serial.print(key_press.time, DEC);
+      Serial.print(F("\t"));
+      uint16_t current_time = Kaleidoscope.millisAtCycleStart();
+      Serial.print(current_time, DEC);
+      Serial.print(F("\t"));
+      uint16_t elapsed_time = current_time - key_press.time;
+      Serial.println(elapsed_time, DEC);
+
+      // Make this key press entry available.
+      key_press.addr = invalid_addr;
     }
   }
 
