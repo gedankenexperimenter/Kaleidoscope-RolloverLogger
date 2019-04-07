@@ -34,9 +34,17 @@ class RolloverLogger : public kaleidoscope::Plugin {
  public:
   EventHandlerResult onKeyswitchEvent(Key& key, byte row, byte col, byte state);
 
+  void deactivate() { detail_level_ = 0; }
+  void activate() { detail_level_ = 1; }
+  void reportCategories() { detail_level_ = 2; }
+  void reportCoordinates() { detail_level_ = 3; }
+  void reportUnsafe() { detail_level_ = 0xFF; }
+
  private:
   static constexpr byte max_key_presses_{8};
-  KeyPress              key_presses_[max_key_presses_];
+
+  KeyPress key_presses_[max_key_presses_];
+  byte     detail_level_{1};
 };
 
 }  // namespace plugin
